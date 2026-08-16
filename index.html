@@ -329,8 +329,11 @@
 
         async function loadFromCloud(showAlert = false) {
             try {
-                // Nyilvános bin esetén kulcs nélkül is lekérhető
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`);
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': ACCESS_KEY
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error(`Szerver hiba: ${response.status}`);
