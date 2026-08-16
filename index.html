@@ -341,12 +341,13 @@
 
                 const data = await response.json();
                 if (data && data.record && Array.isArray(data.record.inventory)) {
-                    inventory = data.record.inventory;
-                    saveAndRenderLocally();
-                    if (showAlert) alert("Sikeres szinkronizálás a felhőből!");
-                } else {
-                    if (showAlert) alert("A felhőben lévő adatok formátuma nem megfelelő.");
-                }
+      inventory = data.record.inventory;
+      saveAndRenderLocally();
+      renderList();
+      renderUseSelect();
+      checkAlerts();
+      if (showAlert) alert("Sikeres szinkronizálás a felhőből!");
+    }
             } catch (err) {
                 console.error("Hiba:", err);
                 if (showAlert) alert("Nem sikerült kapcsolódni a felhőhöz: " + err.message);
