@@ -328,35 +328,50 @@
         let inventory = [];
 
         async function loadFromCloud(showAlert = false) {
-            try {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-                    headers: {
-                        'X-Master-Key': ACCESS_KEY
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Szerver hiba: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data && data.record && Array.isArray(data.record.inventory)) {
-      inventory = data.record.inventory;
-      saveAndRenderLocally();
-      renderList();
-      renderUseSelect();
-      checkAlerts();
-      if (showAlert) alert("Sikeres szinkronizálás a felhőből!");
-    }
-            } catch (err) {
-                console.error("Hiba:", err);
-                if (showAlert) alert("Nem sikerült kapcsolódni a felhőhöz: " + err.message);
-                inventory = JSON.parse(localStorage.getItem('muhely_leltar')) || [];
-                renderList();
-                renderUseSelect();
-                checkAlerts();
+    try {
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+            headers: {
+                'X-Master-Key': ACCESS_KEY
             }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Szerver hiba: ${response.status}`);
         }
+
+        const data = await response.json();
+        
+        if (data && data.record && Array.isArray(data.record.inventory)) {
+            const cloudInventory = data.record.inventory;
+            const localInventory = JSON.parse(localStorage.getItem('muhely_leltar')) || [];
+
+            // Ha a felhő üres, de a gépen vannak adatok, akkor MENTSÜK FEL a gépi adatokat a felhőbe!
+            if (cloudInventory.length === 0 && localInventory.length > 0) {
+                inventory = localInventory;
+                if (showAlert) alert("A felhő üres volt, de a helyi adatok megmaradtak és feltöltődtek!");
+                saveToCloud(); // Felküldjük a gépi adatokat, hogy a tableten is megoszródjanak
+            } else {
+                // Különben elfogadjuk a felhő adatait
+                inventory = cloudInventory;
+                saveAndRenderLocally();
+                if (showAlert) alert("Sikeres szinkronizálás a felhőből!");
+            }
+            
+            renderList();
+            renderUseSelect();
+            checkAlerts();
+        } else {
+            if (showAlert) alert("A felhőben lévő adatok formátuma nem megfelelő.");
+        }
+    } catch (err) {
+        console.error("Hiba:", err);
+        if (showAlert) alert("Nem sikerült kapcsolódni a felhőhöz: " + err.message);
+        inventory = JSON.parse(localStorage.getItem('muhely_leltar')) || [];
+        renderList();
+        renderUseSelect();
+        checkAlerts();
+    }
+}
 
         async function saveToCloud() {
             try {
