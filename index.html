@@ -51,6 +51,7 @@
         .btn-play { background-color: #000; border: none; width: 45px; height: 45px; border-radius: 50%; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .volume-slider { flex: 1; }
         .radio-status { font-size: 12px; margin-top: 8px; opacity: 0.8; text-align: right; }
+        .radio-link-btn { display: block; text-align: center; background-color: #000; color: #ff6600; padding: 8px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -126,15 +127,16 @@
                 <div id="weatherDesc" style="font-size: 14px; opacity: 0.9;">Atkár</div>
             </div>
 
-            <!-- JAVÍTOTT RÁDIÓ KÁRTYA -->
+            <!-- RÁDIÓ KÁRTYA ROBUSTUS HTTPS ÉS DIRECT ADATFOLYAMOKKAL -->
             <div class="card">
                 <div class="card-title">📻 Műhely Rádió</div>
                 <label for="radioSelect" style="display:none;">Adó választása</label>
                 <select id="radioSelect" onchange="changeStream()">
-                    <option value="https://icast.connectmedia.hu/5201/live.mp3">Rádió 1</option>
-                    <option value="https://icast.connectmedia.hu/5001/live.mp3">Retro Rádió</option>
-                    <option value="https://icast.connectmedia.hu/4738/mr2.mp3">Sláger FM</option>
-                    <option value="https://stream.bestfm.hu/bestfm_budapest.mp3">Best FM</option>
+                    <option value="https://icast.connectmedia.hu/5201/live.mp3" data-url="https://radio1.hu">Rádió 1 (Közvetlen Stream)</option>
+                    <option value="https://icast.connectmedia.hu/5001/live.mp3" data-url="https://retroradio.hu">Retro Rádió</option>
+                    <option value="https://icast.connectmedia.hu/4738/mr2.mp3" data-url="https://petofiradio.hu">Petőfi Rádió</option>
+                    <option value="https://stream.slagerfm.hu/slagerfm.mp3" data-url="https://slagerfm.hu">Sláger FM</option>
+                    <option value="https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one" data-url="https://www.bbc.co.uk/sounds/play/live:bbc_radio_one">BBC Radio 1</option>
                 </select>
 
                 <div class="radio-controls">
@@ -144,9 +146,11 @@
 
                 <div id="radioStatus" class="radio-status">Állapot: Kész</div>
 
-                <audio id="radioAudio" crossorigin="anonymous" preload="none">
-                    <source src="https://stream.radio1.hu/high.mp3" type="audio/mpeg">
-                </audio>
+                <audio id="radioAudio" preload="none"></audio>
+
+                <a id="externalRadioBtn" href="https://radio1.hu" target="_blank" class="radio-link-btn">
+                    🔗 Hivatalos webes lejátszó megnyitása
+                </a>
             </div>
         </div>
     </div>
@@ -172,11 +176,9 @@ function renderUI() {
     }
 
     inventory.forEach(item => {
-        // Okos darabszám kiolvasás
         const currentQty = item.quantity ?? item.qty ?? item.mennyiseg ?? 1;
         const isLow = item.isMinAlert && currentQty <= 15;
         
-        // Táblázat sora
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${escapeHtml(item.name)}</strong></td>
@@ -187,7 +189,6 @@ function renderUI() {
         `;
         tbody.appendChild(tr);
 
-        // Select opció
         const opt = document.createElement('option');
         opt.value = item.id;
         opt.textContent = `${item.name} (${currentQty} db)`;
@@ -347,25 +348,34 @@ function switchTab(tabId, btn) {
     btn.classList.add('active');
 }
 
-// --- JAVÍTOTT RÁDIÓ LOGIKA ---
+// --- ROBUSZTUS RÁDIÓ LOGIKA ---
 const audio = document.getElementById('radioAudio');
 const playBtn = document.getElementById('playBtn');
 const radioStatus = document.getElementById('radioStatus');
+const externalRadioBtn = document.getElementById('externalRadioBtn');
 
 function toggleRadio() {
+    const select = document.getElementById('radioSelect');
+    const currentStream = select.value;
+
     if (audio.paused) {
-        radioStatus.textContent = 'Állapot: Betöltés...';
+        radioStatus.textContent = 'Állapot: Csatlakozás...';
+        
+        // Frissítjük a forrást cache-elkerülő paraméterrel a beragadt adás ellen
+        audio.src = currentStream + '?t=' + Date.now();
+
         audio.play().then(() => {
             playBtn.textContent = '⏸';
-            radioStatus.textContent = 'Állapot: Lejátszás';
+            radioStatus.textContent = 'Állapot: Lejátszás 🎵';
         }).catch(err => {
-            console.error("Rádió indítási hiba:", err);
+            console.error("Rádió lejátszási hiba:", err);
             playBtn.textContent = '▶';
-            radioStatus.textContent = 'Állapot: Csatlakozási hiba';
-            alert("Nem sikerült elindítani az adást. Próbálj másik rádiót választani!");
+            radioStatus.textContent = 'Állapot: Adó korlátozva / Hiba';
+            alert("A kiválasztott adó közvetlen streamje nem indítható el (a szolgáltató korlátozása vagy böngésző tiltás miatt). Használd a lenti közvetlen gombot az adáshoz!");
         });
     } else {
         audio.pause();
+        audio.src = ""; // Kapcsolat bontása a sávszélesség spórolásához
         playBtn.textContent = '▶';
         radioStatus.textContent = 'Állapot: Megállítva';
     }
@@ -373,17 +383,21 @@ function toggleRadio() {
 
 function changeStream() {
     const select = document.getElementById('radioSelect');
-    const wasPlaying = !audio.paused;
+    const selectedOption = select.options[select.selectedIndex];
+    
+    // Frissítjük a külső hivatalos hivatkozást
+    const externalUrl = selectedOption.getAttribute('data-url');
+    if (externalUrl) {
+        externalRadioBtn.href = externalUrl;
+    }
 
-    audio.pause();
-    audio.src = select.value;
-    audio.load();
-
-    if (wasPlaying) {
+    if (!audio.paused) {
+        audio.pause();
+        audio.src = select.value + '?t=' + Date.now();
         radioStatus.textContent = 'Állapot: Váltás...';
         audio.play().then(() => {
             playBtn.textContent = '⏸';
-            radioStatus.textContent = 'Állapot: Lejátszás';
+            radioStatus.textContent = 'Állapot: Lejátszás 🎵';
         }).catch(err => {
             console.error("Adóváltási hiba:", err);
             playBtn.textContent = '▶';
