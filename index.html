@@ -166,14 +166,16 @@ function renderUI() {
     }
 
     inventory.forEach(item => {
-        const isLow = item.isMinAlert && item.quantity <= 15;
+        // Okos mennyiség kiolvasás (kezeli a 'quantity', 'qty' és 'mennyiseg' mezőket is)
+        const currentQty = item.quantity ?? item.qty ?? item.mennyiseg ?? 1;
+        const isLow = item.isMinAlert && currentQty <= 15;
         
         // Táblázat sora
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${escapeHtml(item.name)}</strong></td>
             <td style="color: ${isLow ? '#ff4444' : '#fff'}; font-weight: ${isLow ? 'bold' : 'normal'};">
-                ${item.quantity} db ${isLow ? '⚠️ (Kevés!)' : ''}
+                ${currentQty} db ${isLow ? '⚠️ (Kevés!)' : ''}
             </td>
             <td><button class="btn-del" onclick="deleteItem(${item.id})">Törlés</button></td>
         `;
@@ -182,7 +184,7 @@ function renderUI() {
         // Select opció
         const opt = document.createElement('option');
         opt.value = item.id;
-        opt.textContent = `${item.name} (${item.quantity} db)`;
+        opt.textContent = `${item.name} (${currentQty} db)`;
         select.appendChild(opt);
     });
 }
