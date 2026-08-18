@@ -118,10 +118,11 @@
 
         <!-- JOBB OLDAL: IDŐJÁRÁS ÉS RÁDIÓ -->
         <div class="side-panel">
+            <!-- ÉLŐ IDŐJÁRÁS KÁRTYA -->
             <div class="card">
                 <div class="card-title">🌤️ Atkár Időjárás</div>
-                <div style="font-size: 24px; font-weight: bold; margin-top: 10px;">26 °C</div>
-                <div style="font-size: 14px; opacity: 0.9;">Felhős (Atkár)</div>
+                <div id="weatherTemp" style="font-size: 24px; font-weight: bold; margin-top: 10px;">Betöltés...</div>
+                <div id="weatherDesc" style="font-size: 14px; opacity: 0.9;">Atkár</div>
             </div>
 
             <div class="card">
@@ -166,7 +167,7 @@ function renderUI() {
     }
 
     inventory.forEach(item => {
-        // Okos mennyiség kiolvasás (kezeli a 'quantity', 'qty' és 'mennyiseg' mezőket is)
+        // Okos darabszám kiolvasás
         const currentQty = item.quantity ?? item.qty ?? item.mennyiseg ?? 1;
         const isLow = item.isMinAlert && currentQty <= 15;
         
@@ -187,6 +188,36 @@ function renderUI() {
         opt.textContent = `${item.name} (${currentQty} db)`;
         select.appendChild(opt);
     });
+}
+
+// --- ÉLŐ IDŐJÁRÁS ATKÁRRA ---
+async function fetchWeather() {
+    try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=47.72&longitude=19.98&current=temperature_2m,weather_code');
+        const data = await res.json();
+        
+        const temp = Math.round(data.current.temperature_2m);
+        const code = data.current.weather_code;
+        
+        const tempEl = document.getElementById('weatherTemp');
+        const descEl = document.getElementById('weatherDesc');
+        
+        if (tempEl) tempEl.textContent = `${temp} °C`;
+        if (descEl) descEl.textContent = `${getWeatherText(code)} (Atkár)`;
+    } catch (err) {
+        console.error("Időjárás hiba:", err);
+    }
+}
+
+function getWeatherText(code) {
+    if (code === 0) return 'Derűs, napos';
+    if (code >= 1 && code <= 3) return 'Gomolyfelhős';
+    if (code >= 45 && code <= 48) return 'Ködös';
+    if (code >= 51 && code <= 67) return 'Esős';
+    if (code >= 71 && code <= 77) return 'Havazás';
+    if (code >= 80 && code <= 82) return 'Zápor';
+    if (code >= 95) return 'Zivatar';
+    return 'Változékony idő';
 }
 
 // --- FELHŐ MENTÉS ---
@@ -236,7 +267,7 @@ async function loadFromCloud(showAlert = false) {
     } catch (err) {
         statusBtn.style.backgroundColor = '#b71c1c';
         statusBtn.textContent = '⚠️ Szinkron hiba';
-        if (showAlert) alert("Nem sikerült kapcsolódni a felhőhöz! Ellenőrizd a tablet internetkapcsolatát.");
+        if (showAlert) alert("Nem sikerült kapcsolódni a felhőhöz!");
     }
 }
 
@@ -254,7 +285,7 @@ async function addItem(e) {
 
     const existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
     if (existing) {
-        existing.quantity += qty;
+        existing.quantity = (existing.quantity ?? existing.qty ?? 0) + qty;
     } else {
         inventory.push({
             id: Date.now(),
@@ -282,11 +313,12 @@ async function useItem() {
 
     const item = inventory.find(i => i.id === id);
     if (item) {
-        if (item.quantity < qty) {
+        const currentQty = item.quantity ?? item.qty ?? 0;
+        if (currentQty < qty) {
             alert("Nincs ennyi tétel a raktáron!");
             return;
         }
-        item.quantity -= qty;
+        item.quantity = currentQty - qty;
         localStorage.setItem('muhely_leltar', JSON.stringify(inventory));
         renderUI();
         await saveToCloud();
@@ -337,10 +369,11 @@ function escapeHtml(str) {
     return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
 }
 
-// Indításkor szinkronizálás
+// Oldal betöltésekor indítás
 window.addEventListener('DOMContentLoaded', () => {
     renderUI();
     loadFromCloud(false);
+    fetchWeather();
 });
 </script>
 
