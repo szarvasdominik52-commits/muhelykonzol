@@ -3,262 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Műhely Leltár</title>
+    <title>Műhely Vezérlőpult</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #1e1e1e;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        h1, h2 {
-            color: #ffffff;
-            border-bottom: 2px solid #333;
-            padding-bottom: 8px;
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button.btn-sync {
-            background-color: #28a745;
-        }
-        button.btn-sync:hover {
-            background-color: #1e7e34;
-        }
-        button.btn-danger {
-            background-color: #dc3545;
-            padding: 4px 8px;
-        }
-        button.btn-danger:hover {
-            background-color: #bd2130;
-        }
-        form, .use-section {
-            background: #2a2a2a;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        input, select {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #444;
-            background-color: #333;
-            color: #fff;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #333;
-        }
-        th {
-            background-color: #2a2a2a;
-        }
-        .alert-box {
-            background-color: #d9534f;
-            color: white;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            display: none;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0a0a0a; color: #fff; padding: 20px; }
+        
+        .header { text-align: center; margin-bottom: 25px; color: #ff6600; font-size: 28px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .dashboard { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
+        .main-panel { flex: 2; min-width: 320px; background-color: #d95b00; padding: 20px; border-radius: 12px; }
+        .side-panel { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { background-color: #d95b00; padding: 20px; border-radius: 12px; }
+        .card-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid rgba(255,255,255,0.2); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        
+        /* Tabok */
+        .tabs { display: flex; background-color: #a34300; border-radius: 6px; overflow: hidden; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: transparent; color: #fff; font-weight: bold; cursor: pointer; text-align: center; }
+        .tab-btn.active { background-color: #ff6600; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Form elemek */
+        label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500; }
+        input[type="text"], input[type="number"], select { width: 100%; padding: 12px; background-color: #000; border: 1px solid #333; color: #fff; border-radius: 6px; margin-bottom: 15px; font-size: 15px; }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; font-size: 14px; }
+        .checkbox-group input { width: 18px; height: 18px; }
+
+        /* Gombok */
+        .btn-main { width: 100%; padding: 14px; background-color: #000; color: #ff6600; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        .btn-main:hover { background-color: #111; }
+        
+        .sync-group { display: flex; gap: 10px; }
+        .btn-sync { flex: 1; padding: 12px; background-color: #000; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-align: center; }
+        .btn-status { flex: 1; padding: 12px; background-color: #1b5e20; color: #fff; border: none; border-radius: 6px; font-weight: bold; text-align: center; }
+
+        /* Táblázat */
+        table { width: 100%; border-collapse: collapse; background-color: #000; border-radius: 6px; overflow: hidden; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #222; }
+        th { background-color: #111; color: #ff6600; }
+        .btn-del { background-color: #c62828; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+
+        /* Rádió Vezérlő */
+        .radio-controls { display: flex; align-items: center; gap: 15px; margin-top: 15px; }
+        .btn-play { background-color: #000; border: none; width: 45px; height: 45px; border-radius: 50%; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .volume-slider { flex: 1; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Műhely Leltár Rendszer</h1>
+    <div class="header">🛠️ MŰHELY VEZÉRLŐPULT</div>
 
-    <div id="alertBox" class="alert-box"></div>
+    <div class="dashboard">
+        <!-- BAL OLDAL: LELTÁR -->
+        <div class="main-panel">
+            <div class="card-title">📋 Leltár Rendszer</div>
 
-    <div class="btn-group">
-        <button class="btn-sync" onclick="loadFromCloud(true)">☁️ Adatok Szinkronizálása</button>
-        <button onclick="manualSaveToCloud()">💾 Kézi Mentés Felhőbe</button>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('addTab', this)">Hozzáadás</button>
+                <button class="tab-btn" onclick="switchTab('listTab', this)">Lista</button>
+                <button class="tab-btn" onclick="switchTab('useTab', this)">Felhasználás</button>
+            </div>
+
+            <!-- TAB 1: HOZZÁADÁS -->
+            <div id="addTab" class="tab-content active">
+                <form onsubmit="addItem(event)">
+                    <label>Tétel megnevezése:</label>
+                    <input type="text" id="itemName" placeholder="Pl.: 6x40-es facsavar" required>
+
+                    <label>Mennyiség (1 - 1000):</label>
+                    <input type="number" id="itemQty" min="1" value="1" required>
+
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="isMinAlert">
+                        <label for="isMinAlert" style="margin:0;">Ez egy fogyóeszköz (Figyelmeztessen, ha 15 db alá esik!)</label>
+                    </div>
+
+                    <button type="submit" class="btn-main">+ HOZZÁADÁS A LELTÁRHOZ</button>
+                </form>
+            </div>
+
+            <!-- TAB 2: LISTA -->
+            <div id="listTab" class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Név</th>
+                            <th>Mennyiség</th>
+                            <th>Művelet</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryList"></tbody>
+                </table>
+            </div>
+
+            <!-- TAB 3: FELHASZNÁLÁS -->
+            <div id="useTab" class="tab-content">
+                <label>Válassz tételt:</label>
+                <select id="useSelect"><option value="">-- Válassz --</option></select>
+
+                <label>Levonandó mennyiség:</label>
+                <input type="number" id="useQty" min="1" value="1">
+
+                <button class="btn-main" onclick="useItem()">➖ KIVÉTEL A LELTÁRBÓL</button>
+            </div>
+
+            <div class="sync-group">
+                <button class="btn-sync" onclick="loadFromCloud(true)">🔄 Adatok frissítése felhőből</button>
+                <div class="btn-status" id="statusBtn">☁️ Felhő szinkron aktív</div>
+            </div>
+        </div>
+
+        <!-- JOBB OLDAL: IDŐJÁRÁS ÉS RÁDIÓ -->
+        <div class="side-panel">
+            <div class="card">
+                <div class="card-title">🌤️ Atkár Időjárás</div>
+                <div style="font-size: 24px; font-weight: bold; margin-top: 10px;">26 °C</div>
+                <div style="font-size: 14px; opacity: 0.9;">Felhős (Atkár)</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📻 Műhely Rádió</div>
+                <select id="radioSelect" onchange="changeStream()">
+                    <option value="https://stream.radio1.hu/high.mp3">Rádió 1</option>
+                    <option value="https://retro.hu/stream">Retro Rádió</option>
+                </select>
+
+                <div class="radio-controls">
+                    <button class="btn-play" id="playBtn" onclick="toggleRadio()">▶</button>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="0.8" oninput="setVolume(this.value)">
+                </div>
+
+                <audio id="radioAudio" src="https://stream.radio1.hu/high.mp3"></audio>
+                
+                <button class="btn-main" style="margin-top: 15px; font-size: 12px; padding: 10px;" onclick="window.open('https://radio1.hu', '_blank')">
+                    🔗 Hivatalos Rádió 1 ablak megnyitása
+                </button>
+            </div>
+        </div>
     </div>
-
-    <!-- Új tétel hozzáadása -->
-    <h2>Új tétel hozzáadása</h2>
-    <form id="addForm" onsubmit="addItem(event)">
-        <div class="form-group">
-            <label for="itemName">Tétel neve:</label>
-            <input type="text" id="itemName" required placeholder="pl. M6 Csavar">
-        </div>
-        <div class="form-group">
-            <label for="itemQty">Mennyiség:</label>
-            <input type="number" id="itemQty" min="1" value="1" required>
-        </div>
-        <div class="form-group">
-            <label for="itemMinQty">Minimális készlet (értesítéshez):</label>
-            <input type="number" id="itemMinQty" min="0" value="0">
-        </div>
-        <button type="submit">➕ Hozzáadás a leltárhoz</button>
-    </form>
-
-    <!-- Tétel felhasználása -->
-    <h2>Tétel használata / csökkentése</h2>
-    <div class="use-section">
-        <div class="form-group">
-            <label for="useSelect">Válassz tételt:</label>
-            <select id="useSelect"><option value="">-- Válassz --</option></select>
-        </div>
-        <div class="form-group">
-            <label for="useQty">Levonandó mennyiség:</label>
-            <input type="number" id="useQty" min="1" value="1">
-        </div>
-        <button onclick="useItem()">➖ Kivétel a leltárból</button>
-    </div>
-
-    <!-- Leltár lista -->
-    <h2>Készlet lista</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Név</th>
-                <th>Mennyiség</th>
-                <th>Min. Készlet</th>
-                <th>Művelet</th>
-            </tr>
-        </thead>
-        <tbody id="inventoryList">
-            <!-- Dinamikusan feltöltve JS-ből -->
-        </tbody>
-    </table>
-</div>
 
 <script>
-// --- ÚJ KONFIGURÁCIÓ ---
+// --- FELHŐ KONFIGURÁCIÓ ---
 const BIN_ID = '6a845628f5f4af5e29244f66';
 const MASTER_KEY = '$2a$10$6QowppR7Ydwg4yuY2y0QaueS2z3gX5GIkmndr9G4hqNMXuhjmXYCO';
 
 let inventory = JSON.parse(localStorage.getItem('muhely_leltar')) || [];
 
-// --- HOZZÁADÁS (AZONNALI FELHŐMENTÉSSEL) ---
-async function addItem(event) {
-    if (event) event.preventDefault();
-
-    const nameInput = document.getElementById('itemName');
-    const qtyInput = document.getElementById('itemQty');
-    const minQtyInput = document.getElementById('itemMinQty');
-
-    const name = nameInput.value.trim();
-    const quantity = parseInt(qtyInput.value) || 1;
-    const minQuantity = parseInt(minQtyInput.value) || 0;
-
-    if (!name) return;
-
-    const existingItem = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
-
-    if (existingItem) {
-        existingItem.quantity += quantity;
-        if (minQuantity > 0) existingItem.minQuantity = minQuantity;
-    } else {
-        inventory.push({
-            id: Date.now(),
-            name: name,
-            quantity: quantity,
-            minQuantity: minQuantity
-        });
-    }
-
-    // Helyi mentés és frissítés
-    saveAndRenderLocally();
-    renderList();
-    renderUseSelect();
-    checkAlerts();
-
-    // Beviteli mezők törlése
-    nameInput.value = '';
-    qtyInput.value = '1';
-    minQtyInput.value = '0';
-
-    // AZONNALI KÜLDÉS A FELHŐBE A GOMBBAL
-    await saveToCloud();
-}
-
-// --- TÉTEL HASZNÁLATA / CSÖKKENTÉSE ---
-async function useItem() {
+// --- TÁBLÁZAT ÉS LISTÁK MEGJELENÍTÉSE ---
+function renderUI() {
+    const tbody = document.getElementById('inventoryList');
     const select = document.getElementById('useSelect');
-    const qtyInput = document.getElementById('useQty');
-    const itemId = parseInt(select.value);
-    const qtyToUse = parseInt(qtyInput.value) || 1;
+    
+    tbody.innerHTML = '';
+    select.innerHTML = '<option value="">-- Válassz --</option>';
 
-    if (!itemId) {
-        alert("Kérlek válassz ki egy tételt!");
+    if (inventory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Üres leltár.</td></tr>';
         return;
     }
 
-    const item = inventory.find(i => i.id === itemId);
-    if (item) {
-        if (item.quantity < qtyToUse) {
-            alert("Nincs ennyi tétel a raktáron!");
-            return;
-        }
-        item.quantity -= qtyToUse;
-        saveAndRenderLocally();
-        renderList();
-        renderUseSelect();
-        checkAlerts();
+    inventory.forEach(item => {
+        const isLow = item.isMinAlert && item.quantity <= 15;
+        
+        // Táblázat sora
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${escapeHtml(item.name)}</strong></td>
+            <td style="color: ${isLow ? '#ff4444' : '#fff'}; font-weight: ${isLow ? 'bold' : 'normal'};">
+                ${item.quantity} db ${isLow ? '⚠️ (Kevés!)' : ''}
+            </td>
+            <td><button class="btn-del" onclick="deleteItem(${item.id})">Törlés</button></td>
+        `;
+        tbody.appendChild(tr);
 
-        await saveToCloud();
-    }
+        // Select opció
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.textContent = `${item.name} (${item.quantity} db)`;
+        select.appendChild(opt);
+    });
 }
 
-// --- TÉTEL TÖRLÉSE ---
-async function deleteItem(id) {
-    if (confirm("Biztosan törölni szeretnéd ezt a tételt?")) {
-        inventory = inventory.filter(i => i.id !== id);
-        saveAndRenderLocally();
-        renderList();
-        renderUseSelect();
-        checkAlerts();
-
-        await saveToCloud();
-    }
-}
-
-// --- HELYI MENTÉS ---
-function saveAndRenderLocally() {
-    localStorage.setItem('muhely_leltar', JSON.stringify(inventory));
-}
-
-// --- FELTÖLTÉS A FELHŐBE (PUT) ---
+// --- FELHŐ MENTÉS ---
 async function saveToCloud() {
     try {
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -266,136 +198,146 @@ async function saveToCloud() {
             },
             body: JSON.stringify({ inventory: inventory })
         });
-
-        if (!response.ok) {
-            console.error("Felhő mentési hiba, státusz:", response.status);
-            return false;
-        }
-        console.log("Sikeresen felküldve a felhőbe!");
-        return true;
+        return res.ok;
     } catch (err) {
-        console.error("Hálózati hiba mentéskor:", err);
+        console.error("Mentési hiba:", err);
         return false;
     }
 }
 
-async function manualSaveToCloud() {
-    const success = await saveToCloud();
-    if (success) {
-        alert("Sikeresen elmentve a felhőbe!");
-    } else {
-        alert("Hiba történt a felhőbe mentés során.");
-    }
-}
-
-// --- LETÖLTÉS A FELHŐBŐL (GET) ---
+// --- FELHŐ BETÖLTÉS ---
 async function loadFromCloud(showAlert = false) {
+    const statusBtn = document.getElementById('statusBtn');
     try {
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-            headers: {
-                'X-Master-Key': MASTER_KEY
-            }
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+            headers: { 'X-Master-Key': MASTER_KEY }
         });
 
-        if (!response.ok) {
-            throw new Error(`Szerver hiba: ${response.status}`);
-        }
+        if (!res.ok) throw new Error("Szerver státusz: " + res.status);
 
-        const data = await response.json();
-
+        const data = await res.json();
         if (data && data.record && Array.isArray(data.record.inventory)) {
-            const cloudInventory = data.record.inventory;
-            const localInventory = JSON.parse(localStorage.getItem('muhely_leltar')) || [];
-
-            // Védelem: Ha a felhő még üres, de a gépeden vannak tételek, felküldjük azokat
-            if (cloudInventory.length === 0 && localInventory.length > 0) {
-                inventory = localInventory;
+            const cloudData = data.record.inventory;
+            
+            if (cloudData.length === 0 && inventory.length > 0) {
                 await saveToCloud();
-                if (showAlert) alert("A helyi adatok automatikusan feltöltődtek a felhőbe!");
             } else {
-                inventory = cloudInventory;
-                saveAndRenderLocally();
-                if (showAlert) alert("Sikeres szinkronizálás a felhőből!");
+                inventory = cloudData;
+                localStorage.setItem('muhely_leltar', JSON.stringify(inventory));
             }
 
-            renderList();
-            renderUseSelect();
-            checkAlerts();
+            renderUI();
+            statusBtn.style.backgroundColor = '#1b5e20';
+            statusBtn.textContent = '☁️ Felhő szinkron aktív';
+            if (showAlert) alert("Sikeres szinkronizálás a felhőből!");
         }
     } catch (err) {
-        console.error("Hiba szinkronizáláskor:", err);
-        if (showAlert) alert("Nem sikerült kapcsolódni a felhőhöz: " + err.message);
-        inventory = JSON.parse(localStorage.getItem('muhely_leltar')) || [];
-        renderList();
-        renderUseSelect();
-        checkAlerts();
+        statusBtn.style.backgroundColor = '#b71c1c';
+        statusBtn.textContent = '⚠️ Szinkron hiba';
+        if (showAlert) alert("Nem sikerült kapcsolódni a felhőhöz! Ellenőrizd a tablet internetkapcsolatát.");
     }
 }
 
-// --- MEGJELENÍTÉSEK ---
-function renderList() {
-    const tbody = document.getElementById('inventoryList');
-    tbody.innerHTML = '';
+// --- TÉTEL HOZZÁADÁSA ---
+async function addItem(e) {
+    if (e) e.preventDefault();
+    const nameInput = document.getElementById('itemName');
+    const qtyInput = document.getElementById('itemQty');
+    const alertInput = document.getElementById('isMinAlert');
 
-    if (inventory.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">A leltár üres.</td></tr>';
-        return;
-    }
+    const name = nameInput.value.trim();
+    const qty = parseInt(qtyInput.value) || 1;
 
-    inventory.forEach(item => {
-        const tr = document.createElement('tr');
-        const isLow = item.minQuantity && item.quantity <= item.minQuantity;
+    if (!name) return;
 
-        tr.innerHTML = `
-            <td><strong>${escapeHtml(item.name)}</strong></td>
-            <td style="color: ${isLow ? '#ff6b6b' : '#e0e0e0'}; font-weight: ${isLow ? 'bold' : 'normal'};">
-                ${item.quantity} ${isLow ? '⚠️ (Kevés)' : ''}
-            </td>
-            <td>${item.minQuantity || 0}</td>
-            <td>
-                <button class="btn-danger" onclick="deleteItem(${item.id})">Törlés</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-function renderUseSelect() {
-    const select = document.getElementById('useSelect');
-    select.innerHTML = '<option value="">-- Válassz tételt --</option>';
-
-    inventory.forEach(item => {
-        const option = document.createElement('option');
-        option.value = item.id;
-        option.textContent = `${item.name} (${item.quantity} db)`;
-        select.appendChild(option);
-    });
-}
-
-function checkAlerts() {
-    const alertBox = document.getElementById('alertBox');
-    const lowStockItems = inventory.filter(i => i.minQuantity && i.quantity <= i.minQuantity);
-
-    if (lowStockItems.length > 0) {
-        const itemNames = lowStockItems.map(i => `${i.name} (${i.quantity} db)`).join(', ');
-        alertBox.style.display = 'block';
-        alertBox.innerHTML = `⚠️ <strong>Kevés a készlet:</strong> ${escapeHtml(itemNames)}`;
+    const existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+        existing.quantity += qty;
     } else {
-        alertBox.style.display = 'none';
+        inventory.push({
+            id: Date.now(),
+            name: name,
+            quantity: qty,
+            isMinAlert: alertInput.checked
+        });
     }
+
+    localStorage.setItem('muhely_leltar', JSON.stringify(inventory));
+    renderUI();
+
+    nameInput.value = '';
+    qtyInput.value = '1';
+
+    await saveToCloud();
+}
+
+// --- TÉTEL KIVÉTELE ---
+async function useItem() {
+    const select = document.getElementById('useSelect');
+    const qtyInput = document.getElementById('useQty');
+    const id = parseInt(select.value);
+    const qty = parseInt(qtyInput.value) || 1;
+
+    const item = inventory.find(i => i.id === id);
+    if (item) {
+        if (item.quantity < qty) {
+            alert("Nincs ennyi tétel a raktáron!");
+            return;
+        }
+        item.quantity -= qty;
+        localStorage.setItem('muhely_leltar', JSON.stringify(inventory));
+        renderUI();
+        await saveToCloud();
+    }
+}
+
+// --- TÉTEL TÖRLÉSE ---
+async function deleteItem(id) {
+    inventory = inventory.filter(i => i.id !== id);
+    localStorage.setItem('muhely_leltar', JSON.stringify(inventory));
+    renderUI();
+    await saveToCloud();
+}
+
+// --- FÜLEK VÁLTÁSA ---
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+}
+
+// --- RÁDIÓ LOGIKA ---
+const audio = document.getElementById('radioAudio');
+const playBtn = document.getElementById('playBtn');
+
+function toggleRadio() {
+    if (audio.paused) {
+        audio.play();
+        playBtn.textContent = '⏸';
+    } else {
+        audio.pause();
+        playBtn.textContent = '▶';
+    }
+}
+
+function changeStream() {
+    audio.src = document.getElementById('radioSelect').value;
+    if (!audio.paused) audio.play();
+}
+
+function setVolume(val) {
+    audio.volume = val;
 }
 
 function escapeHtml(str) {
-    return str.replace(/[&<>'"]/g, 
-        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-    );
+    return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
 }
 
-// Indításkor szinkronizálás és felület betöltése
+// Indításkor szinkronizálás
 window.addEventListener('DOMContentLoaded', () => {
-    renderList();
-    renderUseSelect();
-    checkAlerts();
+    renderUI();
     loadFromCloud(false);
 });
 </script>
